@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+{% block title %}Image Tools{% endblock %}
+
+{% block content %}
+<div class="page-wrapper">
+  <div style="margin-bottom:24px;">
+    <h1 class="page-title">🖼 Image Tools</h1>
+    <div class="heading-accent"></div>
+    <p style="margin-top:10px;font-size:12px;color:#888;">Background removal, shadow effects, and product mockups — powered by rembg + Pillow</p>
+  </div>
+  <div class="two-col">
+    <div class="card">
+      <div class="form-row">
+        <div class="upload-area" onclick="document.getElementById('img-file').click()">
+          <div style="font-size:32px;margin-bottom:10px;">🖼</div>
+          <div style="font-size:13px;color:#888;margin-bottom:4px;">Drop product image here or click to upload</div>
+          <div style="font-size:11px;color:#333;">PNG, JPG, JPEG, WEBP up to 16MB</div>
+          <input type="file" id="img-file" style="display:none" accept=".png,.jpg,.jpeg,.webp" onchange="previewFile(this,'img-preview','img-prev-src')">
+        </div>
+        <div id="img-preview" style="display:none;margin-top:12px;text-align:center;">
+          <img id="img-prev-src" style="max-height:200px;border-radius:8px;border:1px solid #222;display:block;margin:0 auto;">
+        </div>
+      </div>
+      <div class="form-row">
+        <label class="field-label">Processing Options</label>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+          {% for opt_id, opt_label, checked in [
+            ('opt-removebg', 'Remove Background', true),
+            ('opt-shadow',   'Add Drop Shadow',   false),
+            ('opt-white',    'White Background',  true),
+          ] %}
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:12px;color:#888;padding:10px;background:#0d0d0d;border:1px solid #1a1a1a;border-radius:6px;">
+            <input type="checkbox" id="{{ opt_id }}" name="{{ opt_id }}" {% if checked %}checked{% endif %} style="accent-color:#e8ff47;">
+            {{ opt_label }}
+          </label>
+          {% endfor %}
+        </div>
+      </div>
+      <button id="img-btn" class="btn-primary" style="width:100%;" onclick="doProcessImage()">🖼 Process Image</button>
+    </div>
+    <div id="img-output">
+      <div class="empty-state">
+        <div class="empty-state-icon">🖼</div>
+        <div>Upload a product image to process</div>
+        <div style="font-size:11px;color:#2a2a2a;margin-top:4px;">Powered by rembg + Pillow</div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+async function doProcessImage() {
+  const file = document.getElementById('img-file').files[0];
+  if (!file) { showToast('Upload an image first', true); return; }
+
+  const btn = setLoading('img-btn', 'Processing...');
+  showOutputLoading('img-output', 'rembg is processing your image...');
+
+  const form = new FormData();
+  form.append('image', file);
+  form.append('remove_bg', document.getElementById('opt-removebg').checked);
+  form.append('add_shadow', document.getElementById('opt-shadow').checked);
+  form.append('white_bg',   document.getElementById('opt-white').checked);
+
+  let res;
+  try {
+    const r = await fetch('/api/v1/process-image', { method: 'POST', body: form });
+    res = await r.json();
+  } catch(e) {
+    res = { error: e.message };
+  }
+
+  resetBtn(btn, '🖼 Process Image');
+  if (res.error) { showError('img-output', res.error); return; }
+
+  document.getElementById('img-output').innerHTML = `
+    <div class="card" style="padding:20px;">
+      <div style="font-size:11px;color:#888;letter-spacing:1px;margin-bottom:16px;">PROCESSED VERSIONS</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:16px;">
+        <div style="text-align:center;">
+          <div style="background:white;border-radius:8px;padding:10px;margin-bottom:6px;">
+            <img src="data:image/jpeg;base64,${res.white_bg}" style="max-height:100px;max-width:100%;">
+          </div>
+          <div style="font-size:11px;color:#555;">White BG</div>
+          <a href="data:image/jpeg;base64,${res.white_bg}" download="white_bg.jpg" class="btn-ghost" style="display:inline-block;margin-top:6px;font-size:10px;">↓</a>
+        </div>
+        <div style="text-align:center;">
+          <div style="background:repeating-conic-gradient(#ccc 0% 25%, white 0% 50%) 0 0/20px 20px;border-radius:8px;padding:10px;margin-bottom:6px;">
+            <img src="data:image/png;base64,${res.transparent}" style="max-height:100px;max-width:100%;">
+          </div>
+          <div style="font-size:11px;color:#555;">Transparent</div>
+          <a href="data:image/png;base64,${res.transparent}" download="transparent.png" class="btn-ghost" style="display:inline-block;margin-top:6px;font-size:10px;">↓</a>
+        </div>
+        <div style="text-align:center;">
+          <div style="background:white;border-radius:8px;padding:10px;margin-bottom:6px;">
+            <img src="data:image/png;base64,${res.shadow}" style="max-height:100px;max-width:100%;">
+          </div>
+          <div style="font-size:11px;color:#555;">Drop Shadow</div>
+          <a href="data:image/png;base64,${res.shadow}" download="shadow.png" class="btn-ghost" style="display:inline-block;margin-top:6px;font-size:10px;">↓</a>
+        </div>
+      </div>
+      <div style="padding:12px;background:#0d0d0d;border:1px solid #1a1a1a;border-radius:8px;">
+        <div style="font-size:11px;color:#4eff9e;">✓ Background removed  ✓ 3 versions generated  ✓ Ready to download</div>
+      </div>
+    </div>`;
+
+  showToast('Image processed successfully!');
+}
+</script>
+{% endblock %}

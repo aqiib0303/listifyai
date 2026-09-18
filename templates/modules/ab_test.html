@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% block title %}A/B Tester{% endblock %}
+
+{% block content %}
+<div class="page-wrapper">
+  <div style="margin-bottom:24px;">
+    <h1 class="page-title">⟳ A/B Tester</h1>
+    <div class="heading-accent"></div>
+    <p style="margin-top:10px;font-size:12px;color:#888;">Feature-focused vs lifestyle-focused — discover what converts best</p>
+  </div>
+
+  <div class="two-col" style="margin-bottom:20px;">
+    <div class="card">
+      <div class="form-row">
+        <label class="field-label">Product</label>
+        <input type="text" id="ab-product" class="input-field" placeholder="e.g. Wireless Noise Cancelling Headphones">
+      </div>
+      <div class="form-row">
+        <label class="field-label">Key Features</label>
+        <textarea id="ab-features" class="input-field" rows="3" placeholder="40hr battery, hybrid ANC, premium drivers, foldable..."></textarea>
+      </div>
+      <div class="form-row">
+        <label class="field-label">Target Audience</label>
+        <input type="text" id="ab-audience" class="input-field" placeholder="e.g. Remote workers, commuters, music lovers">
+      </div>
+      <button id="ab-btn" class="btn-primary" style="width:100%;margin-top:4px;" onclick="generateAB()">
+        ⟳ Generate A/B Variants
+      </button>
+    </div>
+
+    <div id="ab-scores" class="card" style="display:none;">
+      <div style="font-size:11px;color:#888;letter-spacing:1.5px;margin-bottom:16px;">HEURISTIC SCORES</div>
+      <div class="form-row">
+        <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
+          <span style="font-size:12px;color:#888;">Version A — Feature-Focused</span>
+          <span id="score-a" style="color:#e8ff47;font-weight:700;">—</span>
+        </div>
+        <div class="score-bar-track"><div id="bar-a" class="score-bar-fill" style="width:0%;background:#e8ff47;"></div></div>
+      </div>
+      <div class="form-row">
+        <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
+          <span style="font-size:12px;color:#888;">Version B — Lifestyle-Focused</span>
+          <span id="score-b" style="color:#4eff9e;font-weight:700;">—</span>
+        </div>
+        <div class="score-bar-track"><div id="bar-b" class="score-bar-fill" style="width:0%;background:#4eff9e;"></div></div>
+      </div>
+      <hr class="divider">
+      <div id="ab-winner" style="font-size:12px;color:#888;text-align:center;"></div>
+    </div>
+  </div>
+
+  <div id="ab-versions" style="display:none;">
+    <div class="two-col">
+      <div style="background:#0d0d0d;border:1px solid #1e1e1e;border-radius:10px;padding:20px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+          <span style="font-size:11px;letter-spacing:1.5px;color:#e8ff47;font-weight:700;">VERSION A — FEATURE</span>
+          <button class="btn-ghost" onclick="copyEl('version-a')">⎘ Copy</button>
+        </div>
+        <div id="version-a" class="output-box" style="max-height:300px;"></div>
+      </div>
+      <div style="background:#0d0d0d;border:1px solid #1e1e1e;border-radius:10px;padding:20px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+          <span style="font-size:11px;letter-spacing:1.5px;color:#4eff9e;font-weight:700;">VERSION B — LIFESTYLE</span>
+          <button class="btn-ghost" onclick="copyEl('version-b')">⎘ Copy</button>
+        </div>
+        <div id="version-b" class="output-box" style="max-height:300px;"></div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/modules/ab_test.js') }}"></script>
+{% endblock %}

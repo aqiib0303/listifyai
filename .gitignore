@@ -1,0 +1,51 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Virtual environments
+venv/
+.venv/
+env/
+ENV/
+
+# Environment variables / secrets
+.env
+.env.*
+!.env.example
+
+# API keys / credentials
+secrets.json
+credentials.json
+api_keys.json
+config_secret.py
+*.pem
+*.key
+
+# Logs
+*.log
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Generated files
+output/
+outputs/
+temp/
+tmp/
+
+# Local databases
+*.db
+*.sqlite
+*.sqlite3
+
+# Large AI models
+*.gguf
+*.safetensors
+*.bin
+models/

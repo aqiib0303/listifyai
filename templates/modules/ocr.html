@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block title %}Label Extract{% endblock %}
+
+{% block content %}
+<div class="page-wrapper">
+  <div style="margin-bottom:24px;">
+    <h1 class="page-title">📷 Label Extract</h1>
+    <div class="heading-accent"></div>
+    <p style="margin-top:10px;font-size:12px;color:#888;">Upload a product label image or paste extracted text, then generate a listing</p>
+  </div>
+  <div class="two-col">
+    <div class="card">
+      <div class="form-row">
+        <div class="upload-area" onclick="document.getElementById('ocr-file').click()">
+          <div style="font-size:28px;margin-bottom:8px;">📷</div>
+          <div style="font-size:13px;color:#888;margin-bottom:4px;">Upload Product Label / Packaging Image</div>
+          <div style="font-size:11px;color:#333;">PNG, JPG, JPEG, WEBP up to 16MB</div>
+          <input type="file" id="ocr-file" style="display:none" accept=".png,.jpg,.jpeg,.webp" onchange="previewFile(this,'ocr-preview','ocr-img')">
+        </div>
+        <div id="ocr-preview" style="display:none;margin-top:12px;text-align:center;">
+          <img id="ocr-img" style="max-height:160px;border-radius:8px;border:1px solid #222;">
+        </div>
+      </div>
+      <div class="form-row">
+        <label class="field-label">Or Paste Extracted Text Directly</label>
+        <textarea id="ocr-text" class="input-field" rows="4" placeholder="Net weight: 500g&#10;Ingredients: 100% organic cotton&#10;Made in Pakistan..."></textarea>
+      </div>
+      <button id="ocr-btn" class="btn-primary" style="width:100%;" onclick="doOCR()">📷 Extract & Generate Listing</button>
+    </div>
+    <div id="ocr-output">
+      <div class="empty-state">
+        <div class="empty-state-icon">📷</div>
+        <div>Upload a label image or paste extracted text</div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+async function doOCR() {
+  const text = document.getElementById('ocr-text').value.trim();
+  const file = document.getElementById('ocr-file').files[0];
+  if (!text && !file) { showToast('Upload image or paste text', true); return; }
+
+  const btn = setLoading('ocr-btn', 'Extracting...');
+  showOutputLoading('ocr-output', 'Processing label data...');
+
+  let res;
+  if (file) {
+    const form = new FormData();
+    form.append('image', file);
+    if (text) form.append('text', text);
+    try {
+      const r = await fetch('/api/v1/ocr-listing', { method: 'POST', body: form });
+      res = await r.json();
+    } catch(e) { res = { error: e.message }; }
+  } else {
+    res = await apiFetch('/api/v1/ocr-listing', { text });
+  }
+
+  resetBtn(btn, '📷 Extract & Generate Listing');
+  if (res.error) { showError('ocr-output', res.error); return; }
+  renderOutput('ocr-output', res.output, 'EXTRACTED & GENERATED');
+}
+</script>
+{% endblock %}

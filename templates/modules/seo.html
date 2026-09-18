@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block title %}SEO Keywords{% endblock %}
+
+{% block content %}
+<div class="page-wrapper">
+  <div style="margin-bottom:24px;">
+    <h1 class="page-title">◉ SEO Keywords</h1>
+    <div class="heading-accent"></div>
+    <p style="margin-top:10px;font-size:12px;color:#888;">Research high-converting keywords for your product niche</p>
+  </div>
+  <div class="two-col">
+    <div class="card">
+      <div class="form-row">
+        <label class="field-label">Product / Niche Description</label>
+        <textarea id="seo-desc" class="input-field" rows="5" placeholder="Describe your product in detail — materials, use case, target buyer, price range..."></textarea>
+      </div>
+      <div class="form-row">
+        <label class="field-label">Target Marketplace</label>
+        <select id="seo-market" class="input-field">
+          <option value="amazon">Amazon</option>
+          <option value="daraz">Daraz</option>
+          <option value="shopify">Shopify / Google</option>
+          <option value="ebay">eBay</option>
+          <option value="etsy">Etsy</option>
+        </select>
+      </div>
+      <button id="seo-btn" class="btn-primary" style="width:100%;margin-top:4px;" onclick="generateSEO()">◉ Research Keywords</button>
+    </div>
+    <div id="seo-output">
+      <div class="empty-state">
+        <div class="empty-state-icon">◉</div>
+        <div>Describe your product to get keyword research</div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+async function generateSEO() {
+  const desc = document.getElementById('seo-desc').value.trim();
+  if (!desc) { showToast('Please describe your product', true); return; }
+  const btn = setLoading('seo-btn', 'Researching...');
+  showOutputLoading('seo-output', 'Analyzing keyword landscape...');
+  const res = await apiFetch('/api/v1/seo-keywords', {
+    product_description: desc,
+    marketplace: document.getElementById('seo-market').value,
+  });
+  resetBtn(btn, '◉ Research Keywords');
+  if (res.error) { showError('seo-output', res.error); return; }
+  renderOutput('seo-output', res.output, 'KEYWORD RESEARCH');
+}
+</script>
+{% endblock %}

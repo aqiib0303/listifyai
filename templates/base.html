@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ListifyAI — {% block title %}Ecommerce Listing Optimizer{% endblock %}</title>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}">
+  {% block head %}{% endblock %}
+</head>
+<body>
+
+{% if current_user.is_authenticated %}
+<header>
+  <div class="header-top">
+    <div style="display:flex;align-items:center;gap:12px;">
+      <div class="logo-mark">✦</div>
+      <div>
+        <div style="font-family:'Syne',sans-serif;font-size:18px;font-weight:800;color:#f0f0f0;letter-spacing:-0.5px;">
+          LISTIFY<span style="color:#e8ff47">AI</span>
+        </div>
+        <div style="font-size:10px;color:#444;letter-spacing:2px;">ECOMMERCE LISTING OPTIMIZER</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;">
+      <div class="pill pill-green">⚡ Qwen2.5-7B Active</div>
+      <div class="pill pill-green">🛡 Filter: ON</div>
+      <div class="pill" style="color:#888;">{{ current_user.username }}</div>
+      <a href="{{ url_for('auth.logout') }}" class="pill pill-action">Logout</a>
+    </div>
+  </div>
+
+  <nav>
+    <a href="{{ url_for('listing.listing_page') }}"     class="tab-btn {% if active_tab=='listing'     %}active{% endif %}">✦ Listing</a>
+    <a href="{{ url_for('ab_test.ab_test_page') }}"     class="tab-btn {% if active_tab=='ab'          %}active{% endif %}">⟳ A/B Tester</a>
+    <a href="{{ url_for('variants.variants_page') }}"   class="tab-btn {% if active_tab=='variants'    %}active{% endif %}">◈ Bulk Variants</a>
+    <a href="{{ url_for('seo.seo_page') }}"             class="tab-btn {% if active_tab=='seo'         %}active{% endif %}">◉ SEO Keywords</a>
+    <a href="{{ url_for('translate.translate_page') }}" class="tab-btn {% if active_tab=='translate'   %}active{% endif %}">◎ Translate</a>
+    <a href="{{ url_for('competitor.competitor_page') }}"class="tab-btn {% if active_tab=='competitor' %}active{% endif %}">⚡ Competitor</a>
+    <a href="{{ url_for('ocr.ocr_page') }}"             class="tab-btn {% if active_tab=='ocr'         %}active{% endif %}">📷 Label Extract</a>
+    <a href="{{ url_for('performance.performance_page') }}"class="tab-btn {% if active_tab=='performance' %}active{% endif %}">▲ Performance</a>
+    <a href="{{ url_for('export.export_page') }}"       class="tab-btn {% if active_tab=='export'      %}active{% endif %}">↑ Export</a>
+    <a href="{{ url_for('tone.tone_page') }}"           class="tab-btn {% if active_tab=='tone'        %}active{% endif %}">✌ Tone Trainer</a>
+    <a href="{{ url_for('image.image_page') }}"         class="tab-btn {% if active_tab=='image'       %}active{% endif %}">🖼 Image Tools</a>
+  </nav>
+</header>
+{% endif %}
+
+<main {% if not current_user.is_authenticated %}style="padding:0"{% endif %}>
+  {% block content %}{% endblock %}
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script src="{{ url_for('static', filename='js/utils.js') }}"></script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% block title %}Export{% endblock %}
+
+{% block content %}
+<div class="page-wrapper">
+  <div style="margin-bottom:24px;">
+    <h1 class="page-title">↑ Export</h1>
+    <div class="heading-accent"></div>
+    <p style="margin-top:10px;font-size:12px;color:#888;">Format and export your listings for any platform</p>
+  </div>
+  <div class="two-col">
+    <div class="card">
+      <div class="form-row">
+        <label class="field-label">Listing Content to Export</label>
+        <textarea id="exp-content" class="input-field" rows="7" placeholder="Paste your generated listing here..."></textarea>
+      </div>
+      <div class="form-row">
+        <label class="field-label">Export Platform</label>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;" id="platform-grid">
+          <div class="platform-btn selected" data-platform="shopify" onclick="selectPlatform(this)" style="background:#0d0d0d;border:1px solid #e8ff47;border-radius:10px;padding:16px;text-align:center;cursor:pointer;">
+            <div style="font-size:22px;margin-bottom:6px;">🛒</div>
+            <div style="font-size:11px;color:#e8ff47;font-weight:700;">Shopify</div>
+          </div>
+          <div class="platform-btn" data-platform="woocommerce" onclick="selectPlatform(this)" style="background:#0d0d0d;border:1px solid #1e1e1e;border-radius:10px;padding:16px;text-align:center;cursor:pointer;transition:all .2s;">
+            <div style="font-size:22px;margin-bottom:6px;">🔌</div>
+            <div style="font-size:11px;color:#888;">WooCommerce</div>
+          </div>
+          <div class="platform-btn" data-platform="daraz" onclick="selectPlatform(this)" style="background:#0d0d0d;border:1px solid #1e1e1e;border-radius:10px;padding:16px;text-align:center;cursor:pointer;transition:all .2s;">
+            <div style="font-size:22px;margin-bottom:6px;">📦</div>
+            <div style="font-size:11px;color:#888;">Daraz</div>
+          </div>
+        </div>
+      </div>
+      <button id="exp-btn" class="btn-primary" style="width:100%;" onclick="doExport()">↑ Format & Export</button>
+    </div>
+    <div id="exp-output">
+      <div class="empty-state">
+        <div class="empty-state-icon">↑</div>
+        <div>Paste a listing and select your target platform</div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+let selectedPlatform = 'shopify';
+function selectPlatform(el) {
+  document.querySelectorAll('.platform-btn').forEach(b => {
+    b.style.borderColor = '#1e1e1e';
+    b.querySelector('div:last-child').style.color = '#888';
+  });
+  el.style.borderColor = '#e8ff47';
+  el.querySelector('div:last-child').style.color = '#e8ff47';
+  selectedPlatform = el.dataset.platform;
+}
+
+async function doExport() {
+  const content = document.getElementById('exp-content').value.trim();
+  if (!content) { showToast('Paste listing content first', true); return; }
+  const btn = setLoading('exp-btn', 'Formatting...');
+  showOutputLoading('exp-output', `Formatting for ${selectedPlatform}...`);
+  const res = await apiFetch('/api/v1/export-format', { listing_content: content, platform: selectedPlatform });
+  resetBtn(btn, '↑ Format & Export');
+  if (res.error) { showError('exp-output', res.error); return; }
+  renderOutput('exp-output', res.output, selectedPlatform.toUpperCase() + ' FORMAT');
+
+  // Add download button
+  const dl = document.createElement('div');
+  dl.style.marginTop = '12px';
+  dl.innerHTML = `<button class="btn-primary" style="width:100%;" onclick="downloadCSV()">↓ Download CSV</button>`;
+  document.getElementById('exp-output').appendChild(dl);
+  window._exportContent = content;
+}
+
+async function downloadCSV() {
+  const r = await fetch('/api/v1/export-download', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({ content: window._exportContent, platform: selectedPlatform }),
+  });
+  const blob = await r.blob();
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = `listifyai-${selectedPlatform}.csv`; a.click();
+  showToast('Download started!');
+}
+</script>
+{% endblock %}

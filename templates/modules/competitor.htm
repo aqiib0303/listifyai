@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}Competitor Analysis{% endblock %}
+
+{% block content %}
+<div class="page-wrapper">
+  <div style="margin-bottom:24px;">
+    <h1 class="page-title">⚡ Competitor Analysis</h1>
+    <div class="heading-accent"></div>
+    <p style="margin-top:10px;font-size:12px;color:#888;">Analyze competitors and generate market-beating copy</p>
+  </div>
+  <div class="two-col">
+    <div class="card">
+      <div class="form-row">
+        <label class="field-label">Competitor URLs (one per line)</label>
+        <textarea id="comp-urls" class="input-field" rows="4" placeholder="https://www.amazon.com/dp/B0XXXXX&#10;https://www.amazon.com/dp/B0YYYYY"></textarea>
+      </div>
+      <div class="form-row">
+        <label class="field-label">Your Product</label>
+        <textarea id="comp-product" class="input-field" rows="3" placeholder="Describe your product and key differentiators..."></textarea>
+      </div>
+      <button id="comp-btn" class="btn-primary" style="width:100%;" onclick="doCompetitor()">⚡ Analyze & Generate</button>
+    </div>
+    <div id="comp-output">
+      <div class="empty-state">
+        <div class="empty-state-icon">⚡</div>
+        <div>Add competitor URLs to analyze their strategy</div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+async function doCompetitor() {
+  const urls = document.getElementById('comp-urls').value.split('\n').filter(u => u.trim());
+  const product = document.getElementById('comp-product').value.trim();
+  if (!urls.length || !product) { showToast('Fill in URLs and product', true); return; }
+  const btn = setLoading('comp-btn', 'Analyzing...');
+  showOutputLoading('comp-output', 'Analyzing competitive landscape...');
+  const res = await apiFetch('/api/v1/competitor-match', { competitor_urls: urls, product });
+  resetBtn(btn, '⚡ Analyze & Generate');
+  if (res.error) { showError('comp-output', res.error); return; }
+  renderOutput('comp-output', res.output, 'COMPETITIVE INTELLIGENCE');
+}
+</script>
+{% endblock %}

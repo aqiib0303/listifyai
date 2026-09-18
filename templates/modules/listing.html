@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% block title %}Listing Generator{% endblock %}
+
+{% block content %}
+<div class="page-wrapper">
+  <div style="margin-bottom:24px;">
+    <h1 class="page-title">✦ Listing Generator</h1>
+    <div class="heading-accent"></div>
+    <p style="margin-top:10px;font-size:12px;color:#888;">Generate complete, high-converting product listings with AI</p>
+  </div>
+
+  <div class="two-col">
+    <div class="card">
+      <div class="form-row">
+        <label class="field-label">Product Name</label>
+        <input type="text" id="productName" class="input-field" placeholder="e.g. Premium Leather Slim Wallet">
+      </div>
+      <div class="form-row">
+        <label class="field-label">Key Features</label>
+        <textarea id="features" class="input-field" rows="3" placeholder="RFID blocking, genuine full-grain leather, 12 card slots..."></textarea>
+      </div>
+      <div class="form-row">
+        <label class="field-label">Target Audience</label>
+        <input type="text" id="audience" class="input-field" placeholder="e.g. Professional men aged 25–45">
+      </div>
+      <div class="form-row">
+        <label class="field-label">SEO Keywords</label>
+        <input type="text" id="keywords" class="input-field" placeholder="slim wallet, mens wallet, RFID wallet, minimalist">
+      </div>
+      <div class="three-col" style="margin-bottom:16px;">
+        <div>
+          <label class="field-label">Tone Style</label>
+          <select id="tone" class="input-field">
+            <option value="luxury">✦ Luxury</option>
+            <option value="casual">☀ Casual</option>
+            <option value="urgent">⚡ Urgent Sale</option>
+            <option value="minimalist">○ Minimalist</option>
+            <option value="cultural_pk">🌙 Pakistani</option>
+            <option value="genz">✌ Gen Z</option>
+            <option value="b2b">◈ Pro B2B</option>
+          </select>
+        </div>
+        <div>
+          <label class="field-label">Seasonal Mode</label>
+          <select id="season" class="input-field">
+            <option value="">None</option>
+            <option value="eid">🌙 Eid</option>
+            <option value="blackfriday">🖤 Black Friday</option>
+            <option value="summer">☀ Summer Sale</option>
+            <option value="backtoschool">📚 Back to School</option>
+          </select>
+        </div>
+        <div>
+          <label class="field-label">Length: <span id="wordCountLabel">200</span>w</label>
+          <input type="range" id="wordCount" min="30" max="500" step="10" value="200"
+            style="width:100%;accent-color:#e8ff47;margin-top:14px;"
+            oninput="document.getElementById('wordCountLabel').textContent=this.value">
+        </div>
+      </div>
+      <button id="generateBtn" class="btn-primary" style="width:100%;" onclick="generateListing()">
+        ✦ Generate Listing
+      </button>
+    </div>
+
+    <div id="outputContainer">
+      <div class="empty-state">
+        <div class="empty-state-icon">✦</div>
+        <div>Fill in product details and click Generate</div>
+        <div style="font-size:11px;color:#2a2a2a;margin-top:4px;">Powered by Qwen2.5-7B</div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/modules/listing.js') }}"></script>
+{% endblock %}

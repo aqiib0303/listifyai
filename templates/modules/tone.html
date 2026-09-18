@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}Tone Trainer{% endblock %}
+
+{% block content %}
+<div class="page-wrapper">
+  <div style="margin-bottom:24px;">
+    <h1 class="page-title">✌ Tone Trainer</h1>
+    <div class="heading-accent"></div>
+    <p style="margin-top:10px;font-size:12px;color:#888;">Learn your brand voice from a sample, replicate it on any new product</p>
+  </div>
+  <div class="two-col">
+    <div class="card">
+      <div class="form-row">
+        <label class="field-label">Brand Voice Sample</label>
+        <textarea id="tone-sample" class="input-field" rows="6" placeholder="Paste an existing product description that perfectly captures your brand tone. The more distinctive the sample, the better the match..."></textarea>
+      </div>
+      <div class="form-row">
+        <label class="field-label">New Product to Describe</label>
+        <textarea id="tone-product" class="input-field" rows="3" placeholder="e.g. Handmade ceramic mug with geometric pattern, 14oz, dishwasher safe, matte black glaze"></textarea>
+      </div>
+      <button id="tone-btn" class="btn-primary" style="width:100%;" onclick="doTone()">✌ Analyze Voice & Write</button>
+    </div>
+    <div id="tone-output">
+      <div class="empty-state">
+        <div class="empty-state-icon">✌</div>
+        <div>Provide a brand sample to get started</div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+async function doTone() {
+  const sample = document.getElementById('tone-sample').value.trim();
+  const product = document.getElementById('tone-product').value.trim();
+  if (!sample || !product) { showToast('Fill in both fields', true); return; }
+  const btn = setLoading('tone-btn', 'Analyzing voice...');
+  showOutputLoading('tone-output', 'Learning your brand voice...');
+  const res = await apiFetch('/api/v1/tone-train', { sample_text: sample, new_product: product });
+  resetBtn(btn, '✌ Analyze Voice & Write');
+  if (res.error) { showError('tone-output', res.error); return; }
+  renderOutput('tone-output', res.output, 'VOICE ANALYSIS + NEW COPY');
+}
+</script>
+{% endblock %}

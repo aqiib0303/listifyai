@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% block title %}Bulk Variants{% endblock %}
+
+{% block content %}
+<div class="page-wrapper">
+  <div style="margin-bottom:24px;">
+    <h1 class="page-title">◈ Bulk Variants</h1>
+    <div class="heading-accent"></div>
+    <p style="margin-top:10px;font-size:12px;color:#888;">Generate optimized listings for every product variant at once</p>
+  </div>
+  <div class="two-col">
+    <div class="card">
+      <div class="form-row">
+        <label class="field-label">Master Product</label>
+        <input type="text" id="v-product" class="input-field" placeholder="e.g. Organic Cotton T-Shirt">
+      </div>
+      <div class="form-row">
+        <label class="field-label">Base Description</label>
+        <textarea id="v-desc" class="input-field" rows="3" placeholder="Premium 100% organic cotton, breathable, pre-shrunk, tagless..."></textarea>
+      </div>
+      <div class="form-row">
+        <label class="field-label">Variation Type</label>
+        <select id="v-type" class="input-field">
+          <option value="color">Color</option>
+          <option value="size">Size</option>
+          <option value="material">Material</option>
+          <option value="scent">Scent / Flavor</option>
+          <option value="style">Style</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <label class="field-label">Variants (one per line)</label>
+        <textarea id="v-list" class="input-field" rows="5" placeholder="Midnight Black&#10;Arctic White&#10;Forest Green&#10;Dusty Rose&#10;Navy Blue"></textarea>
+      </div>
+      <button id="v-btn" class="btn-primary" style="width:100%;" onclick="generateVariants()">◈ Generate All Variants</button>
+    </div>
+    <div id="v-output">
+      <div class="empty-state">
+        <div class="empty-state-icon">◈</div>
+        <div>Enter variants, one per line, then generate</div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+async function generateVariants() {
+  const product = document.getElementById('v-product').value.trim();
+  const baseDesc = document.getElementById('v-desc').value.trim();
+  const variants = document.getElementById('v-list').value.split('\n').filter(v => v.trim());
+  if (!product || !variants.length) { showToast('Fill in product name and variants', true); return; }
+
+  const btn = setLoading('v-btn', 'Generating...');
+  showOutputLoading('v-output', `Generating ${variants.length} variant listings...`);
+
+  const res = await apiFetch('/api/v1/bulk-variants', {
+    product, base_desc: baseDesc,
+    variation_type: document.getElementById('v-type').value,
+    variants,
+  });
+
+  resetBtn(btn, '◈ Generate All Variants');
+  if (res.error) { showError('v-output', res.error); return; }
+  renderOutput('v-output', res.output, `${res.count} VARIANTS GENERATED`);
+}
+</script>
+{% endblock %}

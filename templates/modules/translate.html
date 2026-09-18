@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% block title %}Translate{% endblock %}
+
+{% block content %}
+<div class="page-wrapper">
+  <div style="margin-bottom:24px;">
+    <h1 class="page-title">◎ Translate & Localize</h1>
+    <div class="heading-accent"></div>
+    <p style="margin-top:10px;font-size:12px;color:#888;">Cultural adaptation, not just literal translation</p>
+  </div>
+  <div class="two-col">
+    <div class="card">
+      <div class="form-row">
+        <label class="field-label">Original Listing Text</label>
+        <textarea id="tr-text" class="input-field" rows="5" placeholder="Paste your product description or listing here..."></textarea>
+      </div>
+      <div class="form-row">
+        <label class="field-label">Target Language</label>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;" id="lang-grid">
+          <div class="lang-option selected" data-lang="Arabic" onclick="selectLang(this)">🇸🇦 Arabic</div>
+          <div class="lang-option" data-lang="Urdu" onclick="selectLang(this)">🇵🇰 Urdu</div>
+          <div class="lang-option" data-lang="Hindi" onclick="selectLang(this)">🇮🇳 Hindi</div>
+          <div class="lang-option" data-lang="French" onclick="selectLang(this)">🇫🇷 French</div>
+          <div class="lang-option" data-lang="Spanish" onclick="selectLang(this)">🇪🇸 Spanish</div>
+          <div class="lang-option" data-lang="Chinese" onclick="selectLang(this)">🇨🇳 Chinese</div>
+        </div>
+      </div>
+      <div class="form-row">
+        <label class="field-label">Target Market</label>
+        <select id="tr-market" class="input-field">
+          <option value="pk">🇵🇰 Pakistan (Daraz)</option>
+          <option value="ae">🇦🇪 UAE</option>
+          <option value="sa">🇸🇦 Saudi Arabia</option>
+          <option value="in">🇮🇳 India</option>
+          <option value="uk">🇬🇧 United Kingdom</option>
+          <option value="us">🇺🇸 United States</option>
+        </select>
+      </div>
+      <button id="tr-btn" class="btn-primary" style="width:100%;" onclick="doTranslate()">◎ Translate & Adapt</button>
+    </div>
+    <div id="tr-output">
+      <div class="empty-state">
+        <div class="empty-state-icon">◎</div>
+        <div>Paste text and select target language</div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function selectLang(el) {
+  document.querySelectorAll('.lang-option').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+}
+async function doTranslate() {
+  const text = document.getElementById('tr-text').value.trim();
+  if (!text) { showToast('Paste text to translate', true); return; }
+  const langEl = document.querySelector('.lang-option.selected');
+  const btn = setLoading('tr-btn', 'Translating...');
+  showOutputLoading('tr-output', 'Adapting for target market...');
+  const res = await apiFetch('/api/v1/translate', {
+    text,
+    language: langEl ? langEl.dataset.lang : 'Arabic',
+    market: document.getElementById('tr-market').value,
+  });
+  resetBtn(btn, '◎ Translate & Adapt');
+  if (res.error) { showError('tr-output', res.error); return; }
+  renderOutput('tr-output', res.output, 'CULTURALLY ADAPTED');
+}
+</script>
+{% endblock %}
